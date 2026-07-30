@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>শুভ জন্মদিন — সম্মানিত সভাপতি | BUCC</title>
+
+<!-- Bengali display + body fonts: a serif for the "stage voice", a clean sans for readability -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700;900&family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   TOKENS — Luxury Concert Stage palette
+   ============================================================ */
+:root{
+  --black:        #060403;
+  --black-soft:   #0c0908;
+  --stage-red:    #3a0d12;
+  --stage-red-2:  #6e1620;
+  --gold:         #d9a94e;
+  --gold-bright:  #f7deA0;
+  --gold-deep:    #8a5f1e;
+  --cream:        #f4ead0;
+  --smoke:        rgba(150,120,80,0.10);
+  --font-display: 'Noto Serif Bengali', serif;
+  --font-body:    'Hind Siliguri', sans-serif;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{ scroll-behavior:smooth; background:var(--black); }
+
+body{
+  background:var(--black);
+  color:var(--cream);
+  font-family:var(--font-body);
+  overflow-x:hidden;
+  min-height:100vh;
+  position:relative;
+}
+
+::selection{ background:var(--gold); color:#1a1200; }
+
+::-webkit-scrollbar{ width:8px; }
+::-webkit-scrollbar-track{ background:var(--black); }
+::-webkit-scrollbar-thumb{ background:linear-gradient(var(--gold-deep),var(--gold)); border-radius:4px; }
+
+/* Ambient stage texture behind everything: soft vignette + faint red haze */
+body::before{
+  content:"";
+  position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(122,22,32,0.18), transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(0,0,0,0.6), transparent 70%);
+}
+
+/* Mouse-follow spotlight (JS updates --mx/--my) */
+.mouse-glow{
+  position:fixed; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(circle 260px at var(--mx,50%) var(--my,50%), rgba(217,169,78,0.08), transparent 70%);
+  mix-blend-mode:screen;
+}
+
+section{ position:relative; z-index:2; }
+
+/* ============================================================
+   SHARED TYPOGRAPHY
+   ============================================================ */
+.eyebrow{
+  font-family:var(--font-body);
+  font-size:0.78rem;
+  letter-spacing:0.35em;
+  color:var(--gold);
+  text-transform:uppercase;
+  opacity:0.85;
+}
+.track-number{
+  font-family:var(--font-display);
+  font-weight:700;
+  color:var(--gold-deep);
+  font-size:0.95rem;
+  letter-spacing:0.15em;
+}
+h1,h2,h3{ font-family:var(--font-display); font-weight:700; }
+.glow-text{
+  color:var(--gold-bright);
+  text-shadow:0 0 18px rgba(247,222,160,0.55), 0 0 46px rgba(217,169,78,0.35);
+}
+
+/* ============================================================
+   OPENING CURTAIN / LOADER
+   ============================================================ */
+#curtain{
+  position:fixed; inset:0; z-index:999;
+  background:var(--black);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column;
+  transition:opacity 1.6s ease, visibility 1.6s ease;
+}
+#curtain.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+
+.spotlight-cone{
+  position:absolute; top:-10%; left:50%; transform:translateX(-50%);
+  width:520px; height:820px;
+  background:radial-gradient(ellipse 50% 60% at 50% 0%, rgba(255,235,180,0.35), rgba(217,169,78,0.08) 45%, transparent 70%);
+  opacity:0;
+  animation:spotlightOn 2.4s ease forwards 0.3s;
+  filter:blur(1px);
+}
+@keyframes spotlightOn{
+  0%{ opacity:0; transform:translateX(-50%) scaleY(0.6); }
+  100%{ opacity:1; transform:translateX(-50%) scaleY(1); }
+}
+
+.curtain-guitar{
+  width:150px; height:auto; opacity:0; filter:drop-shadow(0 0 25px rgba(217,169,78,0.5));
+  animation:guitarReveal 1.8s ease forwards 1s;
+  z-index:2;
+}
+@keyframes guitarReveal{
+  0%{ opacity:0; transform:translateY(40px) scale(0.9); }
+  100%{ opacity:1; transform:translateY(0) scale(1); }
+}
+
+.curtain-text{
+  position:absolute; bottom:16%; left:50%; transform:translateX(-50%);
+  text-align:center; width:90%; max-width:600px;
+  z-index:3;
+}
+.curtain-line{
+  font-family:var(--font-display); font-weight:700;
+  font-size:clamp(1.1rem, 4vw, 1.9rem);
+  color:var(--gold-bright);
+  opacity:0;
+  text-shadow:0 0 20px rgba(217,169,78,0.6);
+}
+.curtain-line.active{ animation:curtainLineIn 2.4s ease forwards; }
+@keyframes curtainLineIn{
+  0%{ opacity:0; transform:translateY(14px); letter-spacing:0.05em; }
+  15%{ opacity:1; transform:translateY(0); letter-spacing:0.02em; }
+  85%{ opacity:1; }
+  100%{ opacity:0; transform:translateY(-10px); }
+}
+
+.curtain-smoke{
+  position:absolute; inset:0; z-index:1; pointer-events:none; opacity:0.5;
+  background:
+    radial-gradient(ellipse 60% 30% at 20% 90%, rgba(120,20,25,0.25), transparent 60%),
+    radial-gradient(ellipse 60% 30% at 80% 95%, rgba(80,60,20,0.2), transparent 60%);
+  animation:smokeDrift 8s ease-in-out infinite alternate;
+}
+@keyframes smokeDrift{
+  0%{ transform:translateX(-10px) translateY(0); }
+  100%{ transform:translateX(15px) translateY(-10px); }
+}
+
+/* ============================================================
+   FLOATING MUSIC NOTES (ambient, reused across sections)
+   ============================================================ */
+.notes-field{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1; }
+.note{
+  position:absolute; bottom:-40px;
+  color:var(--gold);
+  opacity:0.55;
+  font-size:1.4rem;
+  animation:floatNote linear infinite;
+  filter:drop-shadow(0 0 6px rgba(217,169,78,0.6));
+}
+@keyframes floatNote{
+  0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+  10%{ opacity:0.6; }
+  90%{ opacity:0.4; }
+  100%{ transform:translateY(-120vh) translateX(40px) rotate(25deg); opacity:0; }
+}
+
+/* Golden sparkle dust */
+.sparkle{
+  position:absolute; width:4px; height:4px; border-radius:50%;
+  background:var(--gold-bright);
+  box-shadow:0 0 8px 2px rgba(247,222,160,0.8);
+  animation:sparkleTwinkle 2.6s ease-in-out infinite;
+}
+@keyframes sparkleTwinkle{
+  0%,100%{ opacity:0.1; transform:scale(0.6); }
+  50%{ opacity:1; transform:scale(1.2); }
+}
+
+/* ============================================================
+   NAV DOTS (setlist progress along the side)
+   ============================================================ */
+#setlist-nav{
+  position:fixed; right:18px; top:50%; transform:translateY(-50%);
+  z-index:60; display:flex; flex-direction:column; gap:14px;
+}
+#setlist-nav a{
+  width:9px; height:9px; border-radius:50%;
+  background:rgba(217,169,78,0.25);
+  border:1px solid var(--gold-deep);
+  display:block; position:relative; transition:all .4s ease;
+}
+#setlist-nav a.active{ background:var(--gold-bright); box-shadow:0 0 12px 3px rgba(247,222,160,0.7); transform:scale(1.3); }
+#setlist-nav a span{
+  position:absolute; right:20px; top:50%; transform:translateY(-50%);
+  font-size:0.68rem; letter-spacing:0.1em; color:var(--gold-bright);
+  white-space:nowrap; opacity:0; transition:opacity .3s ease;
+  font-family:var(--font-body);
+}
+#setlist-nav a:hover span{ opacity:1; }
+@media (max-width:768px){ #setlist-nav{ display:none; } }
+
+/* ============================================================
+   SECTION: HERO / MAIN INTERACTION
+   ============================================================ */
+.hero{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:6vh 6vw; overflow:hidden;
+}
+.hero .eyebrow{ margin-bottom:1.2rem; }
+.hero h1{
+  font-size:clamp(1.8rem, 5vw, 3.2rem);
+  color:var(--gold-bright);
+  text-shadow:0 0 30px rgba(217,169,78,0.5);
+  margin-bottom:0.6rem;
+  line-height:1.3;
+}
+.hero p.sub{ color:rgba(244,234,208,0.75); font-size:1rem; margin-bottom:3.5rem; max-width:520px; }
+
+.guitar-wrap{
+  position:relative; width:min(420px, 78vw);
+  cursor:pointer; user-select:none;
+  transition:transform .4s ease;
+}
+.guitar-wrap:hover{ transform:translateY(-6px) scale(1.02); }
+.guitar-wrap svg{ width:100%; height:auto; display:block; filter:drop-shadow(0 10px 30px rgba(0,0,0,0.6)); }
+
+.guitar-string{ transition:stroke .2s ease; transform-origin:center; }
+.guitar-wrap.strummed .guitar-string{
+  animation:stringVibrate 0.7s ease-in-out 1;
+}
+.guitar-wrap.strummed .gs1{ animation-delay:0s; }
+.guitar-wrap.strummed .gs2{ animation-delay:0.04s; }
+.guitar-wrap.strummed .gs3{ animation-delay:0.08s; }
+.guitar-wrap.strummed .gs4{ animation-delay:0.12s; }
+.guitar-wrap.strummed .gs5{ animation-delay:0.16s; }
+.guitar-wrap.strummed .gs6{ animation-delay:0.2s; }
+@keyframes stringVibrate{
+  0%{ transform:translateY(0); }
+  15%{ transform:translateY(-3px); }
+  30%{ transform:translateY(3px); }
+  45%{ transform:translateY(-2px); }
+  60%{ transform:translateY(2px); }
+  75%{ transform:translateY(-1px); }
+  100%{ transform:translateY(0); }
+}
+
+.pick-hint{
+  margin-top:2.2rem; color:var(--gold-bright); font-weight:600; font-size:1.05rem;
+  letter-spacing:0.03em;
+  animation:hintPulse 1.8s ease-in-out infinite;
+}
+@keyframes hintPulse{ 0%,100%{ opacity:0.55; } 50%{ opacity:1; } }
+
+.gold-burst{
+  position:absolute; inset:0; margin:auto; width:10px; height:10px; border-radius:50%;
+  background:radial-gradient(circle, rgba(255,240,190,0.95), rgba(217,169,78,0.4) 40%, transparent 70%);
+  pointer-events:none; opacity:0; z-index:5;
+}
+.gold-burst.burst{ animation:burstGrow 1.1s ease-out forwards; }
+@keyframes burstGrow{
+  0%{ opacity:0.9; transform:scale(1); }
+  100%{ opacity:0; transform:scale(38); }
+}
+
+.screen-shake{ animation:shakeAll 0.5s ease; }
+@keyframes shakeAll{
+  0%,100%{ transform:translate(0,0); }
+  20%{ transform:translate(-4px,2px); }
+  40%{ transform:translate(4px,-2px); }
+  60%{ transform:translate(-3px,-1px); }
+  80%{ transform:translate(3px,1px); }
+}
+
+.scroll-cue{
+  position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+  color:var(--gold); font-size:0.75rem; letter-spacing:0.3em; opacity:0.7;
+}
+.scroll-cue::after{
+  content:""; display:block; width:1px; height:34px; margin:8px auto 0;
+  background:linear-gradient(var(--gold), transparent);
+  animation:scrollLine 1.8s ease-in-out infinite;
+}
+@keyframes scrollLine{ 0%{ opacity:0.2; } 50%{ opacity:1; } 100%{ opacity:0.2; } }
+
+/* ============================================================
+   SECTION: BIRTHDAY REVEAL
+   ============================================================ */
+.reveal{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:8vh 6vw;
+}
+.portrait-ring{
+  position:relative; width:min(280px, 60vw); aspect-ratio:1/1; border-radius:50%;
+  margin-bottom:2.2rem;
+  opacity:0; transform:scale(0.85);
+}
+.portrait-ring.in{ animation:revealFade 1.6s ease forwards; }
+@keyframes revealFade{ to{ opacity:1; transform:scale(1); } }
+
+.portrait-ring::before{
+  content:""; position:absolute; inset:-14px; border-radius:50%;
+  background:conic-gradient(var(--gold-bright), var(--gold-deep), var(--stage-red-2), var(--gold-bright));
+  filter:blur(2px);
+  animation:ringSpin 8s linear infinite;
+}
+.portrait-ring::after{
+  content:""; position:absolute; inset:-14px; border-radius:50%;
+  box-shadow:0 0 60px 10px rgba(217,169,78,0.45);
+}
+@keyframes ringSpin{ to{ transform:rotate(360deg); } }
+.portrait-ring img{
+  position:relative; width:100%; height:100%; object-fit:cover; border-radius:50%;
+  border:4px solid var(--black); z-index:2; display:block;
+}
+
+.reveal h2{ font-size:clamp(2rem, 7vw, 4rem); margin-bottom:0.4rem; }
+.reveal h3{ font-family:var(--font-body); font-weight:500; color:var(--gold); letter-spacing:0.15em; font-size:1.1rem; margin-bottom:0.3rem; }
+.reveal .name{ font-size:clamp(1.3rem,4vw,1.8rem); color:var(--cream); margin-bottom:2.2rem; font-weight:600; }
+
+.typewrap{
+  max-width:640px; font-size:clamp(1rem,2.4vw,1.2rem); line-height:2; color:var(--cream);
+  min-height:14em; white-space:pre-wrap;
+}
+.typewrap .cursor{ display:inline-block; width:2px; background:var(--gold-bright); animation:blinkCursor 0.8s step-end infinite; margin-left:2px; }
+@keyframes blinkCursor{ 50%{ opacity:0; } }
+
+/* ============================================================
+   SECTION: CAKE CUTTING
+   ============================================================ */
+.cake-section{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:8vh 6vw;
+}
+.cake-section h2{ font-size:clamp(1.6rem,4.5vw,2.6rem); margin-bottom:2.5rem; }
+
+.cake-wrap{ position:relative; width:min(260px, 60vw); cursor:pointer; }
+.cake-wrap svg{ width:100%; height:auto; overflow:visible; }
+.flame{ transform-origin:center bottom; animation:flameFlicker 0.35s ease-in-out infinite alternate; }
+@keyframes flameFlicker{
+  0%{ transform:scaleY(1) scaleX(1) rotate(-2deg); }
+  100%{ transform:scaleY(1.15) scaleX(0.9) rotate(2deg); }
+}
+.cake-wrap.blown .flame{ animation:none; opacity:0; transition:opacity .5s ease; }
+.cake-wrap.blown .smoke-puff{ opacity:1; animation:puffUp 1.6s ease-out forwards; }
+.smoke-puff{ opacity:0; }
+@keyframes puffUp{
+  0%{ opacity:0.7; transform:translateY(0) scale(0.4); }
+  100%{ opacity:0; transform:translateY(-40px) scale(1.6); }
+}
+.cake-hint{ margin-top:1.6rem; color:var(--gold-bright); font-weight:600; animation:hintPulse 1.8s ease-in-out infinite; }
+.cake-msg{
+  margin-top:2rem; font-family:var(--font-display); font-size:clamp(1.3rem,4vw,2rem);
+  color:var(--gold-bright); opacity:0; transform:translateY(10px);
+  transition:all .8s ease;
+}
+.cake-msg.show{ opacity:1; transform:translateY(0); }
+
+/* ============================================================
+   MEMORY SECTION — guitar pick shaped gallery
+   ============================================================ */
+.memory-section{ padding:14vh 6vw; text-align:center; }
+.memory-section h2{ font-size:clamp(1.6rem,4.5vw,2.6rem); margin-bottom:0.6rem; }
+.memory-section .eyebrow{ display:block; margin-bottom:0.8rem; }
+.memory-section p.lead{ color:rgba(244,234,208,0.7); max-width:560px; margin:0 auto 3.5rem; }
+
+.pick-grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
+  gap:2.2rem 1.6rem; max-width:1100px; margin:0 auto;
+}
+.pick-card{
+  position:relative; aspect-ratio:3/4;
+  clip-path: path('M100,0 C160,0 200,55 195,110 C190,180 150,260 100,300 C50,260 10,180 5,110 C0,55 40,0 100,0 Z');
+  overflow:hidden; cursor:pointer;
+  transform-style:preserve-3d; perspective:600px;
+  transition:transform .5s ease, filter .5s ease;
+  background:var(--black-soft);
+}
+.pick-card img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  transition:transform .6s ease, filter .6s ease;
+}
+.pick-card::after{
+  content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.75) 100%);
+  pointer-events:none;
+}
+.pick-card:hover{
+  transform:rotate(-4deg) scale(1.07) translateY(-6px);
+  filter:drop-shadow(0 0 26px rgba(217,169,78,0.65));
+}
+.pick-card:hover img{ transform:scale(1.18) rotate(2deg); filter:brightness(1.08) saturate(1.15); }
+.pick-card .cap{
+  position:absolute; bottom:14px; left:0; right:0; z-index:2;
+  font-size:0.78rem; color:var(--gold-bright); letter-spacing:0.05em; padding:0 14px;
+}
+
+/* ============================================================
+   WISHING MEMBERS — 7 backstage passes
+   ============================================================ */
+.wishers-section{ padding:12vh 6vw; text-align:center; }
+.wishers-section h2{ font-size:clamp(1.6rem,4.5vw,2.6rem); margin-bottom:3rem; }
+.wisher-grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(230px,1fr));
+  gap:1.6rem; max-width:1000px; margin:0 auto;
+}
+.wisher-card{
+  background:linear-gradient(160deg, rgba(217,169,78,0.08), rgba(255,255,255,0.02));
+  border:1px solid rgba(217,169,78,0.3);
+  border-radius:14px; padding:1.8rem 1.4rem;
+  backdrop-filter:blur(6px);
+  text-align:left; position:relative; overflow:hidden;
+  transition:transform .4s ease, border-color .4s ease, box-shadow .4s ease;
+}
+.wisher-card:hover{ transform:translateY(-6px); border-color:var(--gold-bright); box-shadow:0 12px 34px rgba(217,169,78,0.25); }
+.wisher-card::before{
+  content:"🎸"; position:absolute; right:-10px; top:-10px; font-size:3.4rem; opacity:0.07;
+}
+.wisher-tag{ font-family:var(--font-display); font-weight:700; color:var(--gold-bright); font-size:1.05rem; margin-bottom:0.5rem; }
+.wisher-quote{ font-size:0.92rem; line-height:1.7; color:rgba(244,234,208,0.85); }
+
+/* ============================================================
+   SPECIAL SURPRISE — Vinyl + Letter
+   ============================================================ */
+.surprise-section{
+  min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:8vh 6vw; text-align:center;
+}
+.surprise-section h2{ font-size:clamp(1.6rem,4.5vw,2.4rem); margin-bottom:2.4rem; }
+
+.vinyl-wrap{ width:min(230px, 55vw); cursor:pointer; position:relative; }
+.vinyl-wrap svg{ width:100%; height:auto; transition:transform .6s ease; }
+.vinyl-wrap.spin svg{ animation:vinylSpin 3s linear infinite; }
+@keyframes vinylSpin{ to{ transform:rotate(360deg); } }
+.vinyl-hint{ margin-top:1.4rem; color:var(--gold-bright); font-weight:600; animation:hintPulse 1.8s ease-in-out infinite; }
+
+.letter-wrap{
+  margin-top:3rem; max-width:600px; width:100%;
+  perspective:1400px;
+  display:none;
+}
+.letter-wrap.show{ display:block; }
+.envelope{
+  position:relative; background:linear-gradient(160deg, #1a1310, #0c0908);
+  border:1px solid var(--gold-deep); border-radius:10px; padding:2.4rem 2rem;
+  text-align:left; opacity:0; transform:rotateX(-12deg) translateY(20px);
+  transition:all 1s ease;
+  box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+.envelope.open{ opacity:1; transform:rotateX(0) translateY(0); }
+.envelope::before{
+  content:"✉ চিঠি"; position:absolute; top:-14px; left:24px; background:var(--black);
+  padding:0 10px; color:var(--gold); font-size:0.75rem; letter-spacing:0.2em;
+}
+.envelope p{ font-size:1rem; line-height:2; color:var(--cream); white-space:pre-wrap; }
+.envelope .sign{ margin-top:1.2rem; color:var(--gold-bright); font-family:var(--font-display); font-weight:700; text-align:right; }
+
+/* ============================================================
+   ENDING SCENE
+   ============================================================ */
+.ending{
+  min-height:100vh; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; overflow:hidden; background:radial-gradient(ellipse at 50% 100%, #150708, var(--black) 70%);
+}
+#fireworks-canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:1; }
+.ending-content{ position:relative; z-index:3; }
+.ending .big{
+  font-size:clamp(2.2rem, 9vw, 5.5rem); font-weight:900;
+  color:var(--gold-bright);
+  text-shadow:0 0 40px rgba(217,169,78,0.7);
+  letter-spacing:0.02em;
+}
+.ending .mid{ font-size:clamp(1.4rem,5vw,2.4rem); margin-top:0.6rem; }
+.ending .small{ margin-top:1.2rem; color:var(--gold); letter-spacing:0.1em; font-size:0.95rem; }
+.ending .club{ margin-top:0.4rem; color:rgba(244,234,208,0.7); font-size:0.9rem; letter-spacing:0.08em; }
+
+.lantern{
+  position:absolute; bottom:-60px; width:34px; height:44px; border-radius:50% 50% 45% 45%;
+  background:radial-gradient(circle at 50% 35%, #ffdd88, #c8860f 80%);
+  box-shadow:0 0 20px 6px rgba(255,200,90,0.55);
+  animation:lanternRise linear infinite;
+  z-index:2;
+}
+@keyframes lanternRise{
+  0%{ transform:translateY(0) translateX(0); opacity:0; }
+  10%{ opacity:0.9; }
+  100%{ transform:translateY(-115vh) translateX(30px); opacity:0; }
+}
+
+footer{
+  text-align:center; padding:3rem 1rem 4rem; color:rgba(217,169,78,0.5); font-size:0.8rem; position:relative; z-index:2;
+}
+
+/* sound toggle */
+#sound-toggle{
+  position:fixed; bottom:20px; left:20px; z-index:60;
+  background:rgba(6,4,3,0.7); border:1px solid var(--gold-deep); color:var(--gold-bright);
+  padding:10px 16px; border-radius:30px; font-family:var(--font-body); font-size:0.85rem;
+  cursor:pointer; backdrop-filter:blur(6px); transition:all .3s ease;
+}
+#sound-toggle:hover{ border-color:var(--gold-bright); box-shadow:0 0 16px rgba(217,169,78,0.4); }
+
+@media (max-width:600px){
+  #sound-toggle{ font-size:0.75rem; padding:8px 12px; bottom:14px; left:14px; }
+}
+
+/* Reduced motion respect */
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     OPENING CURTAIN
+     ============================================================ -->
+<div id="curtain">
+  <div class="curtain-smoke"></div>
+  <div class="spotlight-cone"></div>
+  <svg class="curtain-guitar" viewBox="0 0 120 300" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="60" cy="220" rx="55" ry="70" fill="#3b2415"/>
+    <ellipse cx="60" cy="220" rx="55" ry="70" fill="none" stroke="#d9a94e" stroke-width="1.5" opacity="0.6"/>
+    <ellipse cx="60" cy="215" rx="20" ry="24" fill="#0c0908"/>
+    <rect x="52" y="30" width="16" height="150" rx="6" fill="#2a1a10"/>
+    <rect x="50" y="10" width="20" height="28" rx="4" fill="#1a1008"/>
+    <line x1="56" y1="35" x2="56" y2="270" stroke="#e9d9b0" stroke-width="0.6"/>
+    <line x1="60" y1="35" x2="60" y2="270" stroke="#e9d9b0" stroke-width="0.6"/>
+    <line x1="64" y1="35" x2="64" y2="270" stroke="#e9d9b0" stroke-width="0.6"/>
+  </svg>
+  <div class="curtain-text">
+    <div class="curtain-line" data-line="1">বাংলাদেশ ইউনিভার্সিটি কালচারাল ক্লাব</div>
+    <div class="curtain-line" data-line="2">আজকের রাতটি একজন বিশেষ মানুষের জন্য...</div>
+    <div class="curtain-line" data-line="3">শুভ জন্মদিন</div>
+  </div>
+</div>
+
+<div class="mouse-glow" id="mouseGlow"></div>
+
+<!-- Setlist side navigation -->
+<nav id="setlist-nav">
+  <a href="#hero" data-label="ট্র্যাক ০১"><span>মঞ্চ প্রবেশ</span></a>
+  <a href="#reveal" data-label="ট্র্যাক ০২"><span>জন্মদিন</span></a>
+  <a href="#cake" data-label="ট্র্যাক ০৩"><span>কেক কাটা</span></a>
+  <a href="#memories" data-label="ট্র্যাক ০৪"><span>স্মৃতি</span></a>
+  <a href="#wishers" data-label="ট্র্যাক ০৫"><span>শুভেচ্ছা</span></a>
+  <a href="#surprise" data-label="ট্র্যাক ০৬"><span>চমক</span></a>
+  <a href="#ending" data-label="ট্র্যাক ০৭"><span>সমাপ্তি</span></a>
+</nav>
+
+<button id="sound-toggle">🎵 সাউন্ড অন করুন</button>
+
+<!-- ============================================================
+     SECTION 01 — HERO / MAIN INTERACTION
+     ============================================================ -->
+<section class="hero" id="hero">
+  <div class="notes-field" id="notesFieldHero"></div>
+  <span class="eyebrow track-number">ট্র্যাক ০১ · মঞ্চ প্রবেশ</span>
+  <h1>আজ রাতের মূল পরিবেশনা —<br>আমাদের সম্মানিত সভাপতির জন্য</h1>
+  <p class="sub">যিনি মঞ্চে গিটার হাতে সুর তোলেন, ঠিক তেমনি নেতৃত্বেও ছন্দ আনেন — আজ তাঁরই জন্মদিন।</p>
+
+  <div class="guitar-wrap" id="guitarWrap">
+    <div class="gold-burst" id="goldBurst"></div>
+    <svg viewBox="0 0 400 700" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="bodyGrad" cx="45%" cy="35%" r="75%">
+          <stop offset="0%" stop-color="#7a4a24"/>
+          <stop offset="70%" stop-color="#4a2c14"/>
+          <stop offset="100%" stop-color="#2a1608"/>
+        </radialGradient>
+      </defs>
+      <!-- body -->
+      <path d="M200,340 C300,340 360,430 350,520 C340,610 280,660 200,670 C120,660 60,610 50,520 C40,430 100,340 200,340 Z" fill="url(#bodyGrad)" stroke="#d9a94e" stroke-width="2" opacity="0.95"/>
+      <ellipse cx="200" cy="500" rx="45" ry="55" fill="#0c0908" stroke="#d9a94e" stroke-width="1.5"/>
+      <path d="M200,340 C260,340 300,395 296,450 C292,505 250,540 200,542 C150,540 108,505 104,450 C100,395 140,340 200,340 Z" fill="none" stroke="#d9a94e" stroke-width="1" opacity="0.4"/>
+      <!-- neck -->
+      <rect x="182" y="60" width="36" height="290" rx="6" fill="#2a1810"/>
+      <rect x="182" y="60" width="36" height="290" rx="6" fill="none" stroke="#8a5f1e" stroke-width="1"/>
+      <!-- head -->
+      <path d="M160,10 L240,10 L232,60 L168,60 Z" fill="#1a1008" stroke="#d9a94e" stroke-width="1.5"/>
+      <circle cx="176" cy="24" r="5" fill="#d9a94e"/>
+      <circle cx="176" cy="44" r="5" fill="#d9a94e"/>
+      <circle cx="224" cy="24" r="5" fill="#d9a94e"/>
+      <circle cx="224" cy="44" r="5" fill="#d9a94e"/>
+      <circle cx="200" cy="14" r="4" fill="#d9a94e"/>
+      <!-- strings -->
+      <line class="guitar-string gs1" x1="186" y1="60" x2="140" y2="640" stroke="#f4ead0" stroke-width="1.2"/>
+      <line class="guitar-string gs2" x1="192" y1="60" x2="168" y2="645" stroke="#f4ead0" stroke-width="1.2"/>
+      <line class="guitar-string gs3" x1="198" y1="60" x2="196" y2="648" stroke="#f4ead0" stroke-width="1.2"/>
+      <line class="guitar-string gs4" x1="204" y1="60" x2="204" y2="648" stroke="#f4ead0" stroke-width="1.2"/>
+      <line class="guitar-string gs5" x1="210" y1="60" x2="232" y2="645" stroke="#f4ead0" stroke-width="1.2"/>
+      <line class="guitar-string gs6" x1="216" y1="60" x2="260" y2="640" stroke="#f4ead0" stroke-width="1.2"/>
+      <!-- pick -->
+      <g id="pickIcon">
+        <path d="M100,470 C100,450 118,438 135,442 C150,446 155,462 148,478 C140,496 118,505 105,495 C97,489 100,479 100,470 Z" fill="#d9a94e" stroke="#f7dea0" stroke-width="1.5"/>
+      </g>
+    </svg>
+  </div>
+  <p class="pick-hint">🎸 গিটারে স্পর্শ করুন</p>
+  <div class="scroll-cue">SCROLL</div>
+</section>
+
+<!-- ============================================================
+     SECTION 02 — BIRTHDAY REVEAL
+     ============================================================ -->
+<section class="reveal" id="reveal">
+  <span class="eyebrow track-number">ট্র্যাক ০২ · জন্মদিন উদযাপন</span>
+  <div class="portrait-ring" id="portraitRing">
+    <img src="photo/5.jpg" alt="সম্মানিত সভাপতি — মাহতাব হোসেন">
+  </div>
+  <h2 class="glow-text">শুভ জন্মদিন</h2>
+  <h3>সম্মানিত সভাপতি</h3>
+  <p class="name">মাহতাব হোসেন</p>
+  <div class="typewrap" id="typewrap"></div>
+</section>
+
+<!-- ============================================================
+     SECTION 03 — CAKE CUTTING
+     ============================================================ -->
+<section class="cake-section" id="cake">
+  <span class="eyebrow track-number">ট্র্যাক ০৩ · কেক কাটার মুহূর্ত</span>
+  <h2 class="glow-text">চলুন একসাথে কেক কাটি</h2>
+  <div class="cake-wrap" id="cakeWrap">
+    <svg viewBox="0 0 260 220" xmlns="http://www.w3.org/2000/svg">
+      <!-- plate -->
+      <ellipse cx="130" cy="195" rx="110" ry="14" fill="#1a1008" stroke="#d9a94e" stroke-width="1.5" opacity="0.8"/>
+      <!-- bottom tier -->
+      <rect x="45" y="140" width="170" height="50" rx="8" fill="#6e1620"/>
+      <rect x="45" y="140" width="170" height="12" fill="#8a2230"/>
+      <!-- top tier -->
+      <rect x="75" y="95" width="110" height="50" rx="8" fill="#3a0d12"/>
+      <rect x="75" y="95" width="110" height="10" fill="#7a1620"/>
+      <!-- gold drip details -->
+      <path d="M45,152 q10,14 20,0 q10,14 20,0 q10,14 20,0 q10,14 20,0 q10,14 20,0 q10,14 20,0 q10,14 20,0" fill="none" stroke="#d9a94e" stroke-width="2.5"/>
+      <!-- candles -->
+      <g id="candle1"><rect x="95" y="65" width="7" height="32" fill="#f4ead0"/><ellipse class="flame" cx="98.5" cy="60" rx="6" ry="11" fill="#f7c94e"/><ellipse class="flame" cx="98.5" cy="60" rx="3" ry="6" fill="#fff3c9"/></g>
+      <g id="candle2"><rect x="127" y="60" width="7" height="37" fill="#f4ead0"/><ellipse class="flame" cx="130.5" cy="55" rx="6" ry="11" fill="#f7c94e"/><ellipse class="flame" cx="130.5" cy="55" rx="3" ry="6" fill="#fff3c9"/></g>
+      <g id="candle3"><rect x="159" y="65" width="7" height="32" fill="#f4ead0"/><ellipse class="flame" cx="162.5" cy="60" rx="6" ry="11" fill="#f7c94e"/><ellipse class="flame" cx="162.5" cy="60" rx="3" ry="6" fill="#fff3c9"/></g>
+      <!-- smoke puffs (shown after blow) -->
+      <circle class="smoke-puff" cx="98" cy="45" r="6" fill="#ccc"/>
+      <circle class="smoke-puff" cx="130" cy="40" r="6" fill="#ccc"/>
+      <circle class="smoke-puff" cx="162" cy="45" r="6" fill="#ccc"/>
+    </svg>
+  </div>
+  <p class="cake-hint">🕯️ মোমবাতি নেভাতে ক্লিক করুন</p>
+  <p class="cake-msg" id="cakeMsg">শুভ জন্মদিন, মাহতাব হোসেন! 🎂</p>
+</section>
+
+<!-- ============================================================
+     SECTION 04 — MEMORY GALLERY
+     ============================================================ -->
+<section class="memory-section" id="memories">
+  <span class="eyebrow">ট্র্যাক ০৪ · সেটলিস্ট অফ মেমোরিজ</span>
+  <h2 class="glow-text">স্মৃতির পাতা থেকে</h2>
+  <p class="lead">মঞ্চে, সংগঠনে, উৎসবে — ক্লাবের সঙ্গে কাটানো কিছু মুহূর্ত।</p>
+  <div class="pick-grid" id="pickGrid">
+    <div class="pick-card"><img src="photo/1.jpg" alt="বিতর্ক প্রতিযোগিতা"><span class="cap">পাবলিক পার্লামেন্ট বিতর্ক</span></div>
+    <div class="pick-card"><img src="photo/2.jpg" alt="ট্রফি হাতে"><span class="cap">অর্জনের মুহূর্ত</span></div>
+    <div class="pick-card"><img src="photo/3.jpg" alt="স্ট্রিট পারফরম্যান্স"><span class="cap">গানের মঞ্চে</span></div>
+    <div class="pick-card"><img src="photo/5.jpg" alt="কনসার্টে বেজ বাজাচ্ছেন"><span class="cap">কনসার্ট নাইট</span></div>
+    <div class="pick-card"><img src="photo/6.jpg" alt="ব্লু জিনস কনসার্ট"><span class="cap">ব্লু জিনস লাইভ</span></div>
+    <div class="pick-card"><img src="photo/7.jpg" alt="উৎসবমুখর মঞ্চ"><span class="cap">দর্শকভরা মঞ্চ</span></div>
+    <div class="pick-card"><img src="photo/8.jpg" alt="দর্শকের সামনে পারফরম্যান্স"><span class="cap">ভিড়ের সামনে সুর</span></div>
+    <div class="pick-card"><img src="photo/9.jpg" alt="ছাদে সূর্যাস্তে গিটার"><span class="cap">নিরিবিলি সুর</span></div>
+    <div class="pick-card"><img src="photo/10.jpg" alt="ক্লাবের গ্রুপ ছবি"><span class="cap">পরিবার BUCC</span></div>
+    <div class="pick-card"><img src="photo/11.jpg" alt="ভক্তের হাতে আঁকা ছবি উপহার"><span class="cap">ভালোবাসার উপহার</span></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 05 — 7 WISHING MEMBERS
+     ============================================================ -->
+<section class="wishers-section" id="wishers">
+  <span class="eyebrow">ট্র্যাক ০৫ · শুভাকাঙ্ক্ষীদের কথা</span>
+  <h2 class="glow-text">৭ জনের পক্ষ থেকে শুভেচ্ছা</h2>
+  <!--
+    ============================================================
+    সম্পাদনার নির্দেশনা: নিচের ৭টি .wisher-card ব্লকে
+    নাম (wisher-tag) ও শুভেচ্ছাবার্তা (wisher-quote) বসিয়ে দিন।
+    আপাতত প্লেসহোল্ডার লেখা আছে।
+    ============================================================
+  -->
+  <div class="wisher-grid">
+    <div class="wisher-card"><div class="wisher-tag">সদস্য ০১ — [নাম বসান]</div><div class="wisher-quote">"[এখানে শুভেচ্ছাবার্তা লিখুন]"</div></div>
+    <div class="wisher-card"><div class="wisher-tag">সদস্য ০২ — [নাম বসান]</div><div class="wisher-quote">"[এখানে শুভেচ্ছাবার্তা লিখুন]"</div></div>
+    <div class="wisher-card"><div class="wisher-tag">সদস্য ০৩ — [নাম বসান]</div><div class="wisher-quote">"[এখানে শুভেচ্ছাবার্তা লিখুন]"</div></div>
+    <div class="wisher-card"><div class="wisher-tag">সদস্য ০৪ — [নাম বসান]</div><div class="wisher-quote">"[এখানে শুভেচ্ছাবার্তা লিখুন]"</div></div>
+    <div class="wisher-card"><div class="wisher-tag">সদস্য ০৫ — [নাম বসান]</div><div class="wisher-quote">"[এখানে শুভেচ্ছাবার্তা লিখুন]"</div></div>
+    <div class="wisher-card"><div class="wisher-tag">সদস্য ০৬ — [নাম বসান]</div><div class="wisher-quote">"[এখানে শুভেচ্ছাবার্তা লিখুন]"</div></div>
+    <div class="wisher-card"><div class="wisher-tag">সদস্য ০৭ — [নাম বসান]</div><div class="wisher-quote">"[এখানে শুভেচ্ছাবার্তা লিখুন]"</div></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 06 — SPECIAL SURPRISE
+     ============================================================ -->
+<section class="surprise-section" id="surprise">
+  <span class="eyebrow track-number">ট্র্যাক ০৬ · বিশেষ চমক</span>
+  <h2 class="glow-text">একটি বিশেষ চিঠি অপেক্ষা করছে</h2>
+  <div class="vinyl-wrap" id="vinylWrap">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="100" cy="100" r="98" fill="#0c0908" stroke="#d9a94e" stroke-width="1"/>
+      <circle cx="100" cy="100" r="82" fill="none" stroke="#2a1c10" stroke-width="1"/>
+      <circle cx="100" cy="100" r="68" fill="none" stroke="#2a1c10" stroke-width="1"/>
+      <circle cx="100" cy="100" r="54" fill="none" stroke="#2a1c10" stroke-width="1"/>
+      <circle cx="100" cy="100" r="38" fill="#6e1620" stroke="#d9a94e" stroke-width="1.5"/>
+      <text x="100" y="96" text-anchor="middle" fill="#f7dea0" font-size="9" font-family="Noto Serif Bengali, serif">BUCC</text>
+      <text x="100" y="110" text-anchor="middle" fill="#f7dea0" font-size="7" font-family="Noto Serif Bengali, serif">সভাপতি</text>
+      <circle cx="100" cy="100" r="4" fill="#0c0908"/>
+    </svg>
+  </div>
+  <p class="vinyl-hint">💿 রেকর্ডে ক্লিক করুন</p>
+
+  <div class="letter-wrap" id="letterWrap">
+    <div class="envelope" id="envelope">
+      <p>প্রিয় সভাপতি,
+
+আপনি শুধু একজন সংগীতশিল্পী নন,
+আপনি আমাদের সবার অনুপ্রেরণা।
+
+আপনার গিটারের প্রতিটি সুর
+আমাদের হৃদয়ে আনন্দ ছড়িয়ে দেয়।
+
+আপনার নেতৃত্বে
+বাংলাদেশ ইউনিভার্সিটি কালচারাল ক্লাব
+আরও এগিয়ে যাক।
+
+আপনার জীবনের প্রতিটি মুহূর্ত
+সুরে, সুখে ও সফলতায় ভরে উঠুক।
+
+শুভ জন্মদিন।</p>
+      <div class="sign">— BUCC পরিবার</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SECTION 07 — ENDING SCENE
+     ============================================================ -->
+<section class="ending" id="ending">
+  <canvas id="fireworks-canvas"></canvas>
+  <div class="ending-content">
+    <div class="big">Happy Birthday</div>
+    <div class="mid glow-text">শুভ জন্মদিন</div>
+    <div class="small">সম্মানিত সভাপতি · মাহতাব হোসেন</div>
+    <div class="club">বাংলাদেশ ইউনিভার্সিটি কালচারাল ক্লাব (BUCC)</div>
+  </div>
+</section>
+
+<footer>বাংলাদেশ ইউনিভার্সিটি কালচারাল ক্লাব (BUCC) পরিবারের পক্ষ থেকে ভালোবাসা সহ তৈরি ❤️</footer>
+
+<script>
+/* ==================================================================
+   জন্মদিন ওয়েবসাইট — Vanilla JS
+   সব এনিমেশন ও ইন্টারেকশন এখানে হ্যান্ডেল করা হয়েছে।
+   ================================================================== */
+
+/* ---------- 0. Web Audio: synthesized guitar-ish sound ----------
+   কোনো mp3 ফাইল ছাড়াই Web Audio API দিয়ে হালকা guitar-string sound
+   তৈরি করা হয়েছে। চাইলে নিচের playPluck()/playAmbient() ফাংশন বাদ দিয়ে
+   <audio src="assets/আপনার-mp3.mp3"> ব্যবহার করতে পারবেন। */
+let audioCtx = null;
+let soundOn = false;
+let ambientNodes = [];
+
+function ensureAudioCtx(){
+  if(!audioCtx){ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  return audioCtx;
+}
+
+function playPluck(freq, delay=0, vol=0.18){
+  const ctx = ensureAudioCtx();
+  const t0 = ctx.currentTime + delay;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(vol, t0);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0 + 1.1);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t0);
+  osc.stop(t0 + 1.2);
+}
+
+function strumChord(){
+  if(!soundOn) return;
+  const notes = [196.0, 246.9, 293.7, 349.2, 415.3, 493.9]; // guitar-ish open-chord-like freqs
+  notes.forEach((f,i)=> playPluck(f, i*0.045, 0.12));
+}
+
+function startAmbient(){
+  if(!soundOn) return;
+  const ctx = ensureAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = 110;
+  gain.gain.value = 0.015;
+  osc.connect(gain).connect(ctx.destination);
+  osc.start();
+  ambientNodes.push({osc, gain});
+}
+
+function stopAmbient(fadeSeconds=2){
+  const ctx = audioCtx;
+  ambientNodes.forEach(n=>{
+    try{
+      if(ctx){
+        n.gain.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + fadeSeconds);
+        n.osc.stop(ctx.currentTime + fadeSeconds + 0.1);
+      }
+    }catch(e){}
+  });
+  ambientNodes = [];
+}
+
+document.getElementById('sound-toggle').addEventListener('click', function(){
+  soundOn = !soundOn;
+  this.textContent = soundOn ? '🔇 সাউন্ড অফ করুন' : '🎵 সাউন্ড অন করুন';
+  if(soundOn){ ensureAudioCtx(); startAmbient(); }
+  else{ stopAmbient(1); }
+});
+
+/* ---------- 1. Opening curtain sequence ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  const lines = document.querySelectorAll('.curtain-line');
+  const timings = [300, 2600, 5000]; // ms start times for each line
+  lines.forEach((el, i) => {
+    setTimeout(() => el.classList.add('active'), timings[i]);
+  });
+  setTimeout(() => {
+    document.getElementById('curtain').classList.add('hide');
+  }, 7200);
+});
+
+/* ---------- 2. Mouse-follow spotlight glow ---------- */
+document.addEventListener('mousemove', (e) => {
+  const mg = document.getElementById('mouseGlow');
+  mg.style.setProperty('--mx', e.clientX + 'px');
+  mg.style.setProperty('--my', e.clientY + 'px');
+});
+
+/* ---------- 3. Floating music notes generator ---------- */
+function spawnNotes(containerId, count){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  const glyphs = ['♪','♫','♩','♬'];
+  for(let i=0;i<count;i++){
+    const n = document.createElement('span');
+    n.className = 'note';
+    n.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
+    n.style.left = Math.random()*100 + '%';
+    n.style.fontSize = (1 + Math.random()*1.2) + 'rem';
+    const dur = 8 + Math.random()*10;
+    n.style.animationDuration = dur + 's';
+    n.style.animationDelay = (Math.random()*dur) + 's';
+    el.appendChild(n);
+  }
+}
+spawnNotes('notesFieldHero', 14);
+
+/* ---------- 4. Guitar interaction (Main Interaction spec) ---------- */
+const guitarWrap = document.getElementById('guitarWrap');
+const goldBurst = document.getElementById('goldBurst');
+let guitarBusy = false;
+
+guitarWrap.addEventListener('click', () => {
+  if(guitarBusy) return;
+  guitarBusy = true;
+
+  guitarWrap.classList.add('strummed');
+  goldBurst.classList.add('burst');
+  document.body.classList.add('screen-shake');
+  strumChord();
+
+  // floating notes burst around the guitar
+  spawnBurstNotes(guitarWrap, 10);
+
+  setTimeout(() => {
+    guitarWrap.classList.remove('strummed');
+    goldBurst.classList.remove('burst');
+    document.body.classList.remove('screen-shake');
+    guitarBusy = false;
+  }, 1100);
+});
+
+function spawnBurstNotes(anchorEl, count){
+  const rect = anchorEl.getBoundingClientRect();
+  for(let i=0;i<count;i++){
+    const n = document.createElement('span');
+    n.className = 'note';
+    n.textContent = ['♪','♫','♬'][Math.floor(Math.random()*3)];
+    n.style.position = 'fixed';
+    n.style.left = (rect.left + rect.width/2 + (Math.random()-0.5)*140) + 'px';
+    n.style.top = (rect.top + rect.height*0.4) + 'px';
+    n.style.bottom = 'auto';
+    n.style.zIndex = 50;
+    n.style.animation = 'floatNote ' + (2.4 + Math.random()) + 's ease-out forwards';
+    document.body.appendChild(n);
+    setTimeout(()=> n.remove(), 3600);
+  }
+}
+
+/* ---------- 5. Birthday Reveal: IntersectionObserver trigger ---------- */
+const wishText = `আপনার সুর যেমন হৃদয় ছুঁয়ে যায়,
+তেমনি আপনার নেতৃত্ব আমাদের অনুপ্রাণিত করে।
+
+আপনার জীবনের প্রতিটি দিন হোক
+নতুন সুর,
+নতুন স্বপ্ন,
+নতুন অর্জনের গল্প।
+
+আপনার সুস্বাস্থ্য,
+সাফল্য,
+দীর্ঘায়ু
+এবং অফুরন্ত আনন্দ কামনা করছি।
+
+বাংলাদেশ ইউনিভার্সিটি কালচারাল ক্লাব (BUCC)
+পরিবারের পক্ষ থেকে
+রইলো আন্তরিক শুভ জন্মদিন।`;
+
+let typedOnce = false;
+function typeWish(){
+  if(typedOnce) return;
+  typedOnce = true;
+  const el = document.getElementById('typewrap');
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  cursor.innerHTML = '&nbsp;';
+  let i = 0;
+  function step(){
+    if(i <= wishText.length){
+      el.textContent = wishText.slice(0, i);
+      el.appendChild(cursor);
+      i += 2;
+      setTimeout(step, 24);
+    }
+  }
+  step();
+}
+
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      document.getElementById('portraitRing').classList.add('in');
+      setTimeout(typeWish, 900);
+    }
+  });
+}, { threshold: 0.4 });
+revealObserver.observe(document.getElementById('reveal'));
+
+/* ---------- 6. Cake cutting interaction ---------- */
+const cakeWrap = document.getElementById('cakeWrap');
+const cakeMsg = document.getElementById('cakeMsg');
+cakeWrap.addEventListener('click', () => {
+  if(cakeWrap.classList.contains('blown')) return;
+  cakeWrap.classList.add('blown');
+  cakeMsg.classList.add('show');
+  launchConfetti(60);
+  if(soundOn) playPluck(392, 0, 0.1);
+});
+
+/* ---------- 7. Confetti (canvas-free, DOM based burst) ---------- */
+function launchConfetti(count){
+  const colors = ['#d9a94e','#f7dea0','#6e1620','#f4ead0'];
+  for(let i=0;i<count;i++){
+    const c = document.createElement('div');
+    const size = 6 + Math.random()*6;
+    c.style.position = 'fixed';
+    c.style.left = (40 + Math.random()*20) + 'vw';
+    c.style.top = '55vh';
+    c.style.width = size+'px';
+    c.style.height = size*0.4+'px';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.zIndex = 80;
+    c.style.opacity = '0.95';
+    c.style.transform = `rotate(${Math.random()*360}deg)`;
+    c.style.pointerEvents = 'none';
+    document.body.appendChild(c);
+    const dx = (Math.random()-0.5)*500;
+    const dy = 300 + Math.random()*400;
+    const rot = Math.random()*720 - 360;
+    c.animate([
+      { transform: c.style.transform + ' translate(0,0)', opacity: 0.95 },
+      { transform: `rotate(${rot}deg) translate(${dx}px, ${dy}px)`, opacity: 0 }
+    ], { duration: 1800 + Math.random()*900, easing:'cubic-bezier(.2,.6,.3,1)' });
+    setTimeout(()=> c.remove(), 2800);
+  }
+}
+
+/* ---------- 8. Vinyl + Letter surprise ---------- */
+const vinylWrap = document.getElementById('vinylWrap');
+const letterWrap = document.getElementById('letterWrap');
+const envelope = document.getElementById('envelope');
+let vinylOpened = false;
+
+vinylWrap.addEventListener('click', () => {
+  if(vinylOpened) return;
+  vinylOpened = true;
+  vinylWrap.classList.add('spin');
+  if(soundOn) playPluck(261.6, 0, 0.12);
+  setTimeout(() => {
+    letterWrap.classList.add('show');
+    requestAnimationFrame(()=> envelope.classList.add('open'));
+  }, 900);
+});
+
+/* ---------- 9. Setlist nav: active state on scroll ---------- */
+const navLinks = document.querySelectorAll('#setlist-nav a');
+const navSections = ['hero','reveal','cake','memories','wishers','surprise','ending'].map(id => document.getElementById(id));
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const idx = navSections.indexOf(entry.target);
+      navLinks.forEach(l => l.classList.remove('active'));
+      if(navLinks[idx]) navLinks[idx].classList.add('active');
+    }
+  });
+}, { threshold: 0.5 });
+navSections.forEach(s => s && navObserver.observe(s));
+
+/* ---------- 10. Fireworks + flying lanterns for the ending scene ---------- */
+const canvas = document.getElementById('fireworks-canvas');
+const ctx2d = canvas.getContext('2d');
+let fwParticles = [];
+let fwRunning = false;
+
+function resizeCanvas(){
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+
+function spawnFirework(){
+  const x = Math.random()*canvas.width;
+  const y = Math.random()*canvas.height*0.5 + 20;
+  const colors = ['#f7dea0','#d9a94e','#f4ead0','#e08a8a'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  const count = 34;
+  for(let i=0;i<count;i++){
+    const angle = (Math.PI*2*i)/count;
+    const speed = 1.4 + Math.random()*2.2;
+    fwParticles.push({
+      x, y,
+      vx: Math.cos(angle)*speed,
+      vy: Math.sin(angle)*speed,
+      life: 1,
+      color
+    });
+  }
+}
+
+function fireworksLoop(){
+  if(!fwRunning) return;
+  ctx2d.clearRect(0,0,canvas.width, canvas.height);
+  fwParticles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.02;
+    p.life -= 0.012;
+  });
+  fwParticles = fwParticles.filter(p => p.life > 0);
+  fwParticles.forEach(p => {
+    ctx2d.globalAlpha = Math.max(p.life,0);
+    ctx2d.fillStyle = p.color;
+    ctx2d.beginPath();
+    ctx2d.arc(p.x, p.y, 2.2, 0, Math.PI*2);
+    ctx2d.fill();
+  });
+  ctx2d.globalAlpha = 1;
+  requestAnimationFrame(fireworksLoop);
+}
+
+function spawnLanterns(){
+  const el = document.getElementById('ending');
+  for(let i=0;i<7;i++){
+    const l = document.createElement('div');
+    l.className = 'lantern';
+    l.style.left = (5 + Math.random()*90) + '%';
+    l.style.animationDuration = (9 + Math.random()*6) + 's';
+    l.style.animationDelay = (Math.random()*6) + 's';
+    el.appendChild(l);
+  }
+}
+
+const endingObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting && !fwRunning){
+      resizeCanvas();
+      fwRunning = true;
+      fireworksLoop();
+      spawnLanterns();
+      const fwInterval = setInterval(() => {
+        if(!fwRunning){ clearInterval(fwInterval); return; }
+        spawnFirework();
+      }, 900);
+      // gently fade ambient music out as the show ends
+      if(soundOn) stopAmbient(4);
+    }
+  });
+}, { threshold: 0.3 });
+endingObserver.observe(document.getElementById('ending'));
+
+/* ---------- 11. Ambient golden sparkles scattered on memory section ---------- */
+(function scatterSparkles(){
+  const mem = document.getElementById('memories');
+  for(let i=0;i<10;i++){
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.style.position = 'absolute';
+    s.style.left = Math.random()*100 + '%';
+    s.style.top = Math.random()*100 + '%';
+    s.style.animationDelay = (Math.random()*2.6) + 's';
+    mem.style.position = 'relative';
+    mem.appendChild(s);
+  }
+})();
+</script>
+</body>
+</html>
